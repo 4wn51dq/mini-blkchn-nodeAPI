@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	state "blockchain-node-gateway/internal/types"
+	state "blockchain-node-gateway/internal/state"
 	"log"
 	"net/http"
 )
@@ -26,11 +26,12 @@ func (th *TxHandler) ReceiveTx(w http.ResponseWriter, r *http.Request) {
 	th.l.Println("Handle POST Tx")
 
 	tx := &state.Tx{}
-	err := tx.TxFromJSON(w, r)
+	err := tx.TxFromJSON(r.Body)
 	if err != nil {
 		http.Error(w, "couldnt unmarshall json", http.StatusBadRequest)
 		return
 	}
 	th.l.Printf("Received tx: %v", tx)
-	state.RecordTx(tx)
+	m := state.Mempool{}
+	m.RecordTx(tx)
 }
